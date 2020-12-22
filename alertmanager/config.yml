@@ -1,11 +1,23 @@
-route:
-    receiver: 'slack'
+# route:
+#     receiver: 'slack'
 
+# receivers:
+#     - name: 'slack'
+#       slack_configs:
+#           - send_resolved: true
+#             text: "{{ .CommonAnnotations.description }}"
+#             username: 'Prometheus'
+#             channel: '#<channel-name>'
+#             api_url: 'https://hooks.slack.com/services/<webhook-id>'
+global:
+  resolve_timeout: 5m
+route:
+  group_by: ['instance']
+  group_wait: 10m
+  group_interval: 10s
+  repeat_interval: 10m
+  receiver: 'web.hook.prometheusalert'
 receivers:
-    - name: 'slack'
-      slack_configs:
-          - send_resolved: true
-            text: "{{ .CommonAnnotations.description }}"
-            username: 'Prometheus'
-            channel: '#<channel-name>'
-            api_url: 'https://hooks.slack.com/services/<webhook-id>'
+- name: 'web.hook.prometheusalert'
+  webhook_configs:
+  - url: 'http://prometheus-center:8080/prometheus/alert'
