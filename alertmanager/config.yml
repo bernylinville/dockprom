@@ -20,4 +20,4 @@ route:
 receivers:
 - name: 'web.hook.prometheusalert'
   webhook_configs:
-  - url: 'http://prometheusalert:8080/prometheus/alert'
+  - url: 'http://prometheusalert:8080/prometheus/alert/'
