@@ -24,8 +24,8 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     restart: unless-stopped
-    expose:
-      - 9090
+    ports:
+      - "9090:9090"
     networks:
       - monitor-net
     labels:
@@ -42,8 +42,8 @@ services:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
     restart: unless-stopped
-    expose:
-      - 9093
+    ports:
+      - "9093:9093"
     networks:
       - monitor-net
     labels:
@@ -64,8 +64,8 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
     restart: unless-stopped
-    expose:
-      - 9100
+    ports:
+      - "9100:9100"
     networks:
       - monitor-net
     labels:
@@ -83,8 +83,8 @@ services:
       - /data/dockerdata:/var/lib/docker:ro
       #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
     restart: unless-stopped
-    expose:
-      - 8080
+    ports:
+      - "8080:8080"
     networks:
       - monitor-net
     labels:
@@ -106,8 +106,8 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - TZ=Asia/Shanghai
     restart: unless-stopped
-    expose:
-      - 3000
+    ports:
+      - "3000:3000"
     networks:
       - monitor-net
     labels:
@@ -117,8 +117,8 @@ services:
     image: prom/pushgateway:v1.3.1
     container_name: pushgateway
     restart: unless-stopped
-    expose:
-      - 9091
+    ports:
+      - "9091:9091"
     networks:
       - monitor-net
     labels:
@@ -133,7 +133,7 @@ services:
       - ./prometheusalert:/app/conf
     restart: unless-stopped
     ports:
-      - 8080
+      - "18080:18080"
     networks:
       - monitor-net
     labels:
@@ -141,23 +141,3 @@ services:
     environment:
       - TZ=Asia/Shanghai
 
-  caddy:
-    image: stefanprodan/caddy
-    container_name: caddy
-    ports:
-      - "3000:3000"
-      - "9090:9090"
-      - "9093:9093"
-      - "9091:9091"
-      - "8080:8080"
-    volumes:
-      - ./caddy:/etc/caddy
-    environment:
-      - ADMIN_USER=${ADMIN_USER:-admin}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - TZ=Asia/Shanghai
-    restart: unless-stopped
-    networks:
-      - monitor-net
-    labels:
-      org.label-schema.group: "monitoring"
