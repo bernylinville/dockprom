@@ -1,13 +1,23 @@
 groups:
+- name: node_alert
+  rules:
+  - alert: 主机CPU告警
+    expr: node_load1 > 1
+    labels:
+      name: prometheusalertcenter
+      level: 1   #告警级别,告警级别定义 0 信息,1 警告,2 一般严重,3 严重,4 灾难
+    annotations:
+      description: "{{ $labels.instance }} CPU load占用过高，当前值{{{ $value }}"  #告警信息
+
 - name: targets
   rules:
   - alert: monitor_service_down
     expr: up == 0
     for: 30s
     labels:
-      severity: critical
+      name: prometheusalertcenter
+      level: 3
     annotations:
-      summary: "Monitor service non-operational"
       description: "Service {{ $labels.instance }} is down."
 
 - name: host
