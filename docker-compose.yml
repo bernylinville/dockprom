@@ -133,7 +133,7 @@ services:
       - /data/prometheus/prometheusalert:/app/conf
     restart: unless-stopped
     ports:
-      - 8080
+      - "8080:8080"
     networks:
       - monitor-net
     labels:
@@ -149,7 +149,6 @@ services:
       - "9090:9090"
       - "9093:9093"
       - "9091:9091"
-      - "18080:8080"
     volumes:
       - ./caddy:/etc/caddy
     environment:
