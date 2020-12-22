@@ -6,6 +6,10 @@ A monitoring solution for Docker hosts and containers with [Prometheus](https://
 
 ***If you're looking for the Docker Swarm version please go to [stefanprodan/swarmprom](https://github.com/stefanprodan/swarmprom)***
 
+## to-do
+* 监控中间件
+* 完善 grafana
+
 ## Install
 
 Clone this repository on your Docker host, cd into dockprom directory and run compose up:
