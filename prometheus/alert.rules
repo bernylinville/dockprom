@@ -1,5 +1,5 @@
 groups:
-- name: node_alert
+- name: host
   rules:
   - alert: 主机CPU告警
     expr: node_load1 > 1
@@ -7,70 +7,205 @@ groups:
       name: prometheusalertcenter
       level: 1   #告警级别,告警级别定义 0 信息,1 警告,2 一般严重,3 严重,4 灾难
     annotations:
-      description: "{{ $labels.job }} CPU load占用过高，当前值{{ $value }}"  #告警信息
+      description: "告警:{{ $labels.instance }} CPU 负载占用过高，当前值{{ $value }}"  #告警信息
+
   - alert: 主机CPU告警
     expr: node_load1 > 2
     labels:
       name: prometheusalertcenter
       level: 2   #告警级别,告警级别定义 0 信息,1 警告,2 一般严重,3 严重,4 灾难
     annotations:
-      description: "{{ $labels.job }} CPU load占用过高，当前值{{ $value }}"  #告警信息
+      description: "告警:{{ $labels.instance }} CPU 负载占用过高，当前值{{ $value }}"  #告警信息
+
   - alert: 主机CPU告警
     expr: node_load1 > 3
     labels:
       name: prometheusalertcenter
       level: 3   #告警级别,告警级别定义 0 信息,1 警告,2 一般严重,3 严重,4 灾难
     annotations:
-      description: "{{ $labels.job }} CPU load占用过高，当前值{{ $value }}"  #告警信息
+      description: "告警:{{ $labels.instance }} CPU 负载占用过高，当前值{{ $value }}"  #告警信息
+
   - alert: 主机CPU告警
     expr: node_load1 > 4
     labels:
       name: prometheusalertcenter
       level: 4   #告警级别,告警级别定义 0 信息,1 警告,2 一般严重,3 严重,4 灾难
     annotations:
-      description: "{{ $labels.job }} CPU load占用过高，当前值{{ $value }}"  #告警信息
+      description: "告警:{{ $labels.instance }} CPU 负载占用过高，当前值{{ $value }}"  #告警信息
 
   - alert: 主机内存告警
-    expr: (sum(node_memory_MemTotal_bytes) - sum(node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes) ) / sum(node_memory_MemTotal_bytes) * 100 > 70
+    expr: (node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes) / node_memory_MemTotal_bytes * 100 > 70
     for: 30s
     labels:
       name: prometheusalertcenter
       level: 1
     annotations:
-      description: "{{ $labels.job }} 内存占用过高，当前值{{ humanize $value}}%."
+      description: "告警:{{ $labels.instance }} 内存占用过高，当前值{{ humanize $value }}%."
+
   - alert: 主机内存告警
-    expr: (sum(node_memory_MemTotal_bytes) - sum(node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes) ) / sum(node_memory_MemTotal_bytes) * 100 > 80
+    expr: (node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes) / node_memory_MemTotal_bytes * 100 > 80
     for: 30s
     labels:
       name: prometheusalertcenter
       level: 2
     annotations:
-      description: "{{ $labels.job }} 内存占用过高，当前值{{ humanize $value}}%."
+      description: "告警:{{ $labels.instance }} 内存占用过高，当前值{{ humanize $value }}%."
+
   - alert: 主机内存告警
-    expr: (sum(node_memory_MemTotal_bytes) - sum(node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes) ) / sum(node_memory_MemTotal_bytes) * 100 > 90
+    expr: (node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes) / node_memory_MemTotal_bytes * 100 > 90
     for: 30s
     labels:
       name: prometheusalertcenter
       level: 3
     annotations:
-      description: "{{ $labels.job }} 内存占用过高，当前值{{ humanize $value}}%."
+      description: "告警:{{ $labels.instance }} 内存占用过高，当前值{{ humanize $value }}%."
+
   - alert: 主机内存告警
-    expr: (sum(node_memory_MemTotal_bytes) - sum(node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes) ) / sum(node_memory_MemTotal_bytes) * 100 > 95
+    expr: (node_memory_MemTotal_bytes - node_memory_MemFree_bytes - node_memory_Buffers_bytes - node_memory_Cached_bytes) / node_memory_MemTotal_bytes * 100 > 95
     for: 30s
     labels:
       name: prometheusalertcenter
       level: 4
     annotations:
-      description: "{{ $labels.job }} 内存占用过高，当前值{{ humanize $value}}%."
+      description: "告警:{{ $labels.instance }} 内存占用过高，当前值{{ humanize $value }}%."
 
   - alert: 主机磁盘告警
-    expr: (node_filesystem_size_bytes{fstype="xfs"} - node_filesystem_free_bytes{fstype="xfs"}) / node_filesystem_size_bytes{fstype="xfs"}  * 100 > 85
+    expr: (node_filesystem_size_bytes{fstype="xfs"} - node_filesystem_free_bytes{fstype="xfs"}) / node_filesystem_size_bytes{fstype="xfs"} * 100 > 85
     for: 30s
     labels:
       severity: warning
     annotations:
       summary: "Server storage is almost full"
-      description: "Docker host storage usage is {{ humanize $value}}%. Reported by instance {{ $labels.instance }} of job {{ $labels.job }}."
+      description: "告警:{{ $labels.instance }}分区{{ $labels.mountpoint}}磁盘占用{{ humanize $value}}%."
+
+  - alert: HostMemoryUnderMemoryPressure
+    expr: rate(node_vmstat_pgmajfault[1m]) > 1000
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host memory under memory pressure (instance {{ $labels.instance }})"
+      description: "The node is under heavy memory pressure. High rate of major page faults\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostUnusualNetworkThroughputIn
+    expr: sum by (instance) (irate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host unusual network throughput in (instance {{ $labels.instance }})"
+      description: "Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostUnusualNetworkThroughputOut
+    expr: sum by (instance) (irate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 100
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host unusual network throughput out (instance {{ $labels.instance }})"
+      description: "Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostUnusualDiskReadRate
+    expr: sum by (instance) (irate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host unusual disk read rate (instance {{ $labels.instance }})"
+      description: "Disk is probably reading too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostUnusualDiskWriteRate
+    expr: sum by (instance) (irate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 50
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host unusual disk write rate (instance {{ $labels.instance }})"
+      description: "Disk is probably writing too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostOutOfDiskSpace
+    expr: (node_filesystem_avail_bytes{mountpoint="/"}  * 100) / node_filesystem_size_bytes{mountpoint="/"} < 10
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host out of disk space (instance {{ $labels.instance }})"
+      description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostOutOfDiskSpace
+    expr: (node_filesystem_avail_bytes{mountpoint="/data"}  * 100) / node_filesystem_size_bytes{mountpoint="/data"} < 10
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host out of disk space (instance {{ $labels.instance }})"
+      description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostDiskWillFillIn4Hours
+    expr: predict_linear(node_filesystem_free_bytes{fstype!~"tmpfs"}[1h], 4 * 3600) < 0
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host disk will fill in 4 hours (instance {{ $labels.instance }})"
+      description: "Disk will fill in 4 hours at current write rate\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostOutOfInodes
+    expr: node_filesystem_files_free{mountpoint ="/"} / node_filesystem_files{mountpoint ="/"} * 100 < 10
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host out of inodes (instance {{ $labels.instance }})"
+      description: "Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostOutOfInodes
+    expr: node_filesystem_files_free{mountpoint ="/data"} / node_filesystem_files{mountpoint ="/data"} * 100 < 10
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host out of inodes (instance {{ $labels.instance }})"
+      description: "Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostUnusualDiskReadLatency
+    expr: rate(node_disk_read_time_seconds_total[1m]) / rate(node_disk_reads_completed_total[1m]) > 100
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host unusual disk read latency (instance {{ $labels.instance }})"
+      description: "Disk latency is growing (read operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostUnusualDiskWriteLatency
+    expr: rate(node_disk_write_time_seconds_total[1m]) / rate(node_disk_writes_completed_total[1m]) > 100
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host unusual disk write latency (instance {{ $labels.instance }})"
+      description: "Disk latency is growing (write operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+# 1000 context switches is an arbitrary number.
+  # Alert threshold depends on nature of application.
+  # Please read: https://github.com/samber/awesome-prometheus-alerts/issues/58
+ # - alert: HostContextSwitching
+ #   expr: rate(node_context_switches_total[5m]) > 1000
+ #   for: 5m
+ #   labels:
+ #     severity: warning
+ #   annotations:
+ #     summary: "Host context switching (instance {{ $labels.instance }})"
+ #     description: "Context switching is growing on node (> 1000 / s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: HostKernelVersionDeviations
+    expr: count(sum(label_replace(node_uname_info, "kernel", "$1", "release", "([0-9]+.[0-9]+.[0-9]+).*")) by (kernel)) > 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host kernel version deviations (instance {{ $labels.instance }})"
+      description: "Different kernel versions are running\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
 - name: targets
   rules:
@@ -82,34 +217,3 @@ groups:
       level: 3
     annotations:
       description: "Service {{ $labels.instance }} is down."
-
-
-
-- name: containers
-  rules:
-  - alert: jenkins_down
-    expr: absent(container_memory_usage_bytes{name="jenkins"})
-    for: 30s
-    labels:
-      severity: critical
-    annotations:
-      summary: "Jenkins down"
-      description: "Jenkins container is down for more than 30 seconds."
-
-  - alert: jenkins_high_cpu
-    expr: sum(rate(container_cpu_usage_seconds_total{name="jenkins"}[1m])) / count(node_cpu_seconds_total{mode="system"}) * 100 > 10
-    for: 30s
-    labels:
-      severity: warning
-    annotations:
-      summary: "Jenkins high CPU usage"
-      description: "Jenkins CPU usage is {{ humanize $value}}%."
-
-  - alert: jenkins_high_memory
-    expr: sum(container_memory_usage_bytes{name="jenkins"}) > 1200000000
-    for: 30s
-    labels:
-      severity: warning
-    annotations:
-      summary: "Jenkins high memory usage"
-      description: "Jenkins memory consumption is at {{ humanize $value}}."
